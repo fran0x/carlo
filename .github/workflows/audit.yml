@@ -1,9 +1,12 @@
-# Checks Cargo.lock against the RustSec advisory database: weekly, because new advisories land
-# against unchanged code, and whenever the dependencies change.
+# Checks the locked dependencies for known vulnerabilities: Cargo.lock against RustSec
+# (cargo-audit) and uv.lock against the PyPI advisory database (pip-audit). Weekly, because new
+# advisories land against unchanged code, and whenever the dependencies change.
 #
-# Policy: strict (`--deny warnings`). Vulnerable, unsound, unmaintained and yanked crates all
-# fail. With no deployed service, a red run costs nothing until someone reads it. Fix it by
-# updating the crate, or add an ignore with its reason to `.cargo/audit.toml`.
+# Policy: strict. cargo-audit fails on vulnerable, unsound, unmaintained and yanked crates
+# (`--deny warnings`); pip-audit fails on any known vulnerability and on any package it cannot
+# audit (`--strict`). With no deployed service, a red run costs nothing until someone reads it.
+# Fix it by updating the package, or add an ignore with its reason: `.cargo/audit.toml` for Rust,
+# `--ignore-vuln <id>` below with a comment for Python.
 name: audit
 
 on:
@@ -11,16 +14,16 @@ on:
     - cron: "0 6 * * 1" # Mondays 06:00 UTC
   push:
     branches: [main]
-    paths: [Cargo.lock, "**/Cargo.toml"]
+    paths: [Cargo.lock, "**/Cargo.toml", uv.lock, "**/pyproject.toml"]
   pull_request:
-    paths: [Cargo.lock, "**/Cargo.toml"]
+    paths: [Cargo.lock, "**/Cargo.toml", uv.lock, "**/pyproject.toml"]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  audit:
+  rust:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -30,3 +33,16 @@ jobs:
         with:
           tool: cargo-audit@0.22.2
       - run: cargo audit --deny warnings
+
+  python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: 0.13.8
+      # Every package in uv.lock, dev tools included, with hashes, so pip-audit checks exactly
+      # what is locked without installing anything.
+      - run: uv export --frozen --all-groups --format requirements-txt --no-emit-project -o requirements.txt
+      - run: uvx pip-audit@2.10.1 -r requirements.txt --require-hashes --disable-pip --strict

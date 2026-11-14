@@ -278,8 +278,8 @@ Numba 0.68; Rust 1.97. Times are medians of several runs; yours will differ.
 `allow_threads` to `detach`. Most examples online no longer compile as written.
 
 **CI:** `.github/workflows/ci.yml` runs `just ci` on Rust 1.97.1 with the locked dependencies.
-`.github/workflows/audit.yml` runs `cargo audit --deny warnings` every Monday and when the
-dependencies change.
+`.github/workflows/audit.yml` checks the Rust and Python dependencies for known vulnerabilities
+(`cargo audit`, `pip-audit`) every Monday and when they change.
 
 **Data:** market data is not committed (`data/*.parquet` is git-ignored) because Deribit's terms
 on redistribution are unchecked. Download it yourself with `just fetch`.
