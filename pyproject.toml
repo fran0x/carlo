@@ -1,0 +1,32 @@
+[project]
+name = "carlo"
+version = "0.1.0"
+description = "Python side: Deribit data, NumPy/Numba baselines, Heston calibration, benchmarks"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "pyarrow",
+    "requests",
+    "numba",
+    "QuantLib",
+    "matplotlib",
+]
+
+[dependency-groups]
+dev = ["maturin", "pytest", "ruff"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+pythonpath = ["python"]
+
+[tool.ruff]
+line-length = 120
+src = ["python"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

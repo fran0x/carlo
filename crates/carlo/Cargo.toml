@@ -1,0 +1,26 @@
+[package]
+name = "carlo"
+version = "0.1.0"
+description = "Monte Carlo pricing of BTC options: GBM, Heston, exotics, Greeks and VaR"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+libm = "0.2.16"
+rand = "0.10.3"
+rand_chacha = "0.10.0"
+rand_distr = "0.6.0"
+rayon.workspace = true
+thiserror = "2.0.21"
+
+[dev-dependencies]
+criterion = "0.8.2"
+
+[[bench]]
+name = "pricing"
+harness = false
+
+[lints]
+workspace = true
