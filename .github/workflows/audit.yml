@@ -1,0 +1,32 @@
+# Checks Cargo.lock against the RustSec advisory database: weekly, because new advisories land
+# against unchanged code, and whenever the dependencies change.
+#
+# Policy: strict (`--deny warnings`). Vulnerable, unsound, unmaintained and yanked crates all
+# fail. With no deployed service, a red run costs nothing until someone reads it. Fix it by
+# updating the crate, or add an ignore with its reason to `.cargo/audit.toml`.
+name: audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  push:
+    branches: [main]
+    paths: [Cargo.lock, "**/Cargo.toml"]
+  pull_request:
+    paths: [Cargo.lock, "**/Cargo.toml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Prebuilt, checksum-verified binary instead of compiling cargo-audit on every run.
+      - uses: taiki-e/install-action@4a76afe23f9e08d2d9550fb56e556444e8611d21 # v2.90.4
+        with:
+          tool: cargo-audit@0.22.2
+      - run: cargo audit --deny warnings
