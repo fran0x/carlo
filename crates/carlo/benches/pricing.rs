@@ -36,6 +36,22 @@ fn european(c: &mut Criterion) {
             b.iter(|| gbm::european(black_box(F), &opt, 0.3833, &sim).unwrap())
         });
     }
+    // The sequential loop with SmallRng instead of ChaCha8: isolates the generator's cost.
+    // Not in the library, which needs ChaCha8's independent streams for bit-identical
+    // sequential and parallel results.
+    g.bench_function("sequential_small_rng", |b| {
+        b.iter(|| {
+            let (drift, vol) = (-0.5 * 0.3833_f64.powi(2) * opt.t, 0.3833 * opt.t.sqrt());
+            let mut rng = SmallRng::seed_from_u64(black_box(42));
+            let sum: f64 = (0..1_000_000)
+                .map(|_| {
+                    let z: f64 = rng.sample(StandardNormal);
+                    opt.payoff(black_box(F) * (drift + vol * z).exp())
+                })
+                .sum();
+            sum / 1e6
+        })
+    });
     g.finish();
 }
 

@@ -61,6 +61,10 @@ ChaCha8, a cryptographic-quality random generator (5.9 ms per million numbers vs
 simpler `SmallRng`). Rust wins with parallelism: 6–10× its own single-thread time on 14 cores and 4–6× faster than
 NumPy, depending on the run (parallel times ranged from 1.6 to 2.6 ms).
 
+The generator is the whole single-thread gap: the same loop with `SmallRng` takes 8.1 ms against
+16.4 ms with ChaCha8 (`just bench-rs -- gbm_european`), so it beats NumPy's 10–11 ms. The library
+keeps ChaCha8 because its independent streams make sequential and parallel runs bit-identical.
+
 Compiler settings matter too (single thread; `just bench-rs --profile release-fast-build` for
 the fast build, `RUSTFLAGS="-C target-cpu=native" just bench-rs` for the last column):
 
