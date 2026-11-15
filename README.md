@@ -70,17 +70,19 @@ results and lessons.
 
 ## Code map
 
-| Path | Steps | What it is |
+| Step | Python (`python/`) | Rust (`crates/carlo/src/` unless noted) |
 |---|---|---|
-| `python/deribit.py` | 1 | Download the snapshot |
-| `python/pricing.py` | 2, 4 | Black-76, GBM in NumPy and Numba, Heston in NumPy |
-| `python/checks.py` | 2–5 | Correctness checks against the snapshot |
-| `python/calibrate.py` | 4 | Heston calibration |
-| `python/var_numpy.py` | 6 | VaR in NumPy |
-| `python/bench.py` | 3, 6, 7 | Python vs Rust timings |
-| `crates/carlo` | 3–6 | Rust library: pricing, exotics, Greeks, VaR, benchmarks |
-| `crates/carlo-py` | 7 | Python bindings |
-| `crates/carlo-live` | 8 | Live feed and latency |
+| 1 Market data | `deribit.py` | — |
+| 2 GBM vs Black-76 | `pricing.py` (`black76`, `mc_numpy`) | `black76.rs`, `gbm.rs`, `engine.rs` (shared loop) |
+| 3 Speed | `pricing.py` (`mc_numba`), `bench.py` | `crates/carlo/benches/pricing.rs` |
+| 4 Heston | `calibrate.py` (QuantLib fit) | `paths.rs` (Euler, QE) |
+| 5 Path-dependent | `pricing.py` (`heston_up_and_out_numpy`) | `paths.rs` (knock-out and Asian payoffs) |
+| 6 Greeks and VaR | `var_numpy.py` | `greeks.rs`, `var.rs` |
+| 7 Python calls Rust | `bench.py` | `crates/carlo-py` |
+| 8 Live | — | `crates/carlo-live` |
+
+Checks: `python/checks.py` (steps 2–5, needs downloaded data), `python/tests/`, and Rust unit
+tests in each module.
 
 Run `just` to list every command. Only `fetch` and `live` use the network, and only Deribit's
 public, read-only market data: no account, no orders.
