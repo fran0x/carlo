@@ -58,8 +58,8 @@ just bench-rs    # Rust micro-benchmarks (criterion)
 
 **Lesson:** on one thread, Rust *loses* to NumPy. NumPy runs optimised C, and the Rust code uses
 ChaCha8, a cryptographic-quality random generator (5.9 ms per million numbers vs 1.2 ms for the
-simpler `SmallRng`). Rust wins with parallelism: 6.5× its own single-thread time on 14 cores,
-4× faster than NumPy.
+simpler `SmallRng`). Rust wins with parallelism: 6–10× its own single-thread time on 14 cores and 4–6× faster than
+NumPy, depending on the run (parallel times ranged from 1.6 to 2.6 ms).
 
 Compiler settings matter too (single thread; `just bench-rs --profile release-fast-build` for
 the fast build, `RUSTFLAGS="-C target-cpu=native" just bench-rs` for the last column):

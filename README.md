@@ -61,7 +61,7 @@ results and lessons.
 |---|---|---|---|
 | [1](docs/journey.md#1-get-real-market-data) | What do BTC options cost now? | `just fetch` | 322 liquid options and a year of prices |
 | [2](docs/journey.md#2-price-with-the-simplest-model-in-python) | Can a simulation reproduce the market? | `just checks` | 93% of GBM prices within 2 standard errors of Black-76 |
-| [3](docs/journey.md#3-the-same-in-rust-then-in-parallel) | Is Rust faster, and why? | `just bench-py` | Slower than NumPy on 1 thread, 4× faster in parallel |
+| [3](docs/journey.md#3-the-same-in-rust-then-in-parallel) | Is Rust faster, and why? | `just bench-py` | Slower than NumPy on 1 thread, 4–6× faster in parallel |
 | [4](docs/journey.md#4-a-realistic-model-fitted-to-the-market) | Why doesn't one volatility fit? | `just calibrate` | Heston fits to 2.3 vol points; QE ~28× faster than Euler |
 | [5](docs/journey.md#5-products-only-simulation-can-price) | Options that depend on the whole path? | `just checks` | Knock-out 1,713 USD vs vanilla 3,280 |
 | [6](docs/journey.md#6-sensitivities-and-risk-against-the-clock) | How much could the book lose tomorrow? | `just bench-py` | Nested VaR in 32 ms (NumPy 719 ms) |
