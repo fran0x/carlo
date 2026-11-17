@@ -1,25 +1,27 @@
 # Glossary
 
-The terms used in the [README](../README.md) and the [journey](journey.md).
+The short version of the terms used in the [README](../README.md), the
+[journey](journey.md) and [Reading the results](reading-results.md). You do not need to
+memorise these; come back when a result uses a term you do not recognise.
 
 | Term | Meaning |
 |---|---|
-| **Call / put** | The right to buy (call) or sell (put) at a fixed price, the **strike**, on a fixed date, the **expiry**. Deribit's options are **European**: exercised only at expiry. |
-| **Book** | All the positions a trader holds, valued and risk-managed together. |
-| **Mark price** | The exchange's own fair price for an option, used for margin and P&L. Deribit computes it from its implied volatility. |
-| **Forward (F)** | Today's market price for delivery at expiry. Pricing from F with a zero interest rate sidesteps crypto interest rates. |
-| **Volatility (σ)** | How much returns swing, as an annual standard deviation: 40% means a typical yearly move of ±40%. |
+| **Call / put** | A call pays when the market finishes above its **strike**; a put pays when it finishes below. The **expiry** is the date when that comparison is made. Deribit's options are European, so they exercise only at expiry. |
+| **Book** | A group of positions valued and managed together. |
+| **Mark price** | Deribit's reference price for margin and profit and loss (P&L). It is built from the option's implied volatility. |
+| **Forward (F)** | The market price agreed today for delivery at the option's expiry. This project prices from the forward and assumes a zero interest rate. |
+| **Volatility (σ)** | A measure of how widely returns move, quoted as an annual percentage. Higher volatility means a wider range of plausible prices. |
 | **Vol point** | One percentage point of volatility: 39% to 40% is one vol point. |
-| **Implied / realised volatility** | Implied: the σ that makes a formula match the market price, the market's forecast. Realised: measured from past prices. |
-| **Volatility smile** | Implied volatility differs by strike and expiry. If the market believed in one constant σ, it would be flat. |
-| **GBM** | Geometric Brownian motion: the price moves randomly in percentage terms with a constant σ. The simplest price model. |
-| **Black-76** | The exact price of a European option under GBM, written in terms of the forward. The answer key for the simulation. |
-| **Heston** | GBM where the variance (σ²) is random too: it pulls back to a long-run level θ at speed κ, jitters with size ξ (vol of vol) and moves with correlation ρ to the price. Five parameters, with v₀ the starting variance. It produces a smile. |
-| **Euler / QE scheme** | Two ways to step a Heston path through time. Euler moves the variance by its average drift plus noise and clips it at zero; QE (Andersen, 2008) draws the next variance from a distribution matched to the exact one, so it stays accurate with large steps. |
-| **Calibration** | Tuning a model's parameters until its prices match the market's. |
-| **Standard error** | The uncertainty of a Monte Carlo estimate: payoff standard deviation / √paths. Two prices agree if they are within about 2 standard errors. |
-| **Exotic option** | One whose payoff depends on the whole price path. A **knock-out** dies if the price touches a barrier; an **Asian** pays on the average price. Usually no formula: simulate. |
-| **Greeks** | Sensitivities of the price: **delta** to the forward, **gamma** of delta, **vega** to volatility (per vol point), **theta** to one day passing. |
-| **VaR / expected shortfall** | Value at Risk: a loss exceeded only with small probability, e.g. the worst 1% of tomorrows. Expected shortfall: the average loss in that worst 1%. |
-| **Nested Monte Carlo** | A simulation inside each scenario of another simulation, needed when a product has no formula. Expensive. |
-| **Common random numbers** | Using the same random draws for two valuations you compare, so their noise cancels in the difference. |
+| **Implied / realised volatility** | Implied volatility is the value that makes a pricing formula match today's option price. Realised volatility is measured from past market moves. |
+| **Volatility smile** | A plot showing that implied volatility changes with strike and expiry instead of staying flat. |
+| **GBM** | Geometric Brownian motion: a simple model where the price moves randomly and volatility stays constant. |
+| **Black-76** | The exact price of a European option under GBM, written in terms of the forward. Here it acts as the answer key for the simplest simulations. |
+| **Heston** | A model where both price and variance can move. Five parameters describe the starting variance, long-run level, mean reversion, vol of vol and correlation. Unlike GBM, it can produce a volatility smile. |
+| **Euler / QE scheme** | Two ways to move a Heston simulation forward in time. Euler is simpler; Andersen's QE scheme costs more per step but can stay accurate with larger steps. |
+| **Calibration** | Choosing model parameters that make its prices fit observed market prices as closely as possible. |
+| **Standard error** | An estimate of the simulation noise around a Monte Carlo price. It shrinks as more paths are added. |
+| **Exotic option** | An option whose payoff depends on the path, not only the final price. A **knock-out** expires worthless after touching a barrier; an **Asian** uses an average price. |
+| **Greeks** | Small-change sensitivities: **delta** to the forward, **gamma** to the change in delta, **vega** to volatility and **theta** to one day passing. |
+| **VaR / expected shortfall** | Value at Risk is a loss threshold exceeded only in a chosen fraction of scenarios. Expected shortfall is the average loss beyond that threshold. |
+| **Nested Monte Carlo** | A simulation inside each scenario of another simulation. It is useful when the inner product has no formula, but it is expensive. |
+| **Common random numbers** | Reusing the same random draws for two valuations so that simulation noise cancels when you compare them. |

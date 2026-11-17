@@ -1,11 +1,15 @@
 # The journey
 
-Eight steps from market data to live repricing. Each answers one question, builds on the one
-before, and has a check that proves it works: read the step, run the command, then look at the
-code. Terms in **bold** are defined in the [glossary](glossary.md).
+This is the project from beginning to end: fetch a market snapshot, build the simplest pricer,
+make it faster, add a richer model, measure risk and finally run it on live updates. Each step
+starts with a question and ends with a result you can reproduce. Terms in **bold** are defined
+in the [glossary](glossary.md).
 
-Set up first (see the [README](../README.md#get-set-up)), then download data: every number below
-comes from the 14 Nov 2026 snapshot, so yours will differ.
+See [Reading the results](reading-results.md) for how to interpret prices, standard errors,
+calibration diagnostics, risk measures and latency percentiles.
+
+Set up the project first (see the [README](../README.md#quick-start)), then download the data.
+The numbers below came from the 14 Nov 2026 snapshot, so a fresh run will differ.
 
 ## 1. Get real market data
 
@@ -43,9 +47,9 @@ together and this check means nothing (it showed 63%).
 
 *Is Rust faster? By how much, and why?*
 
-`crates/carlo` is the Rust library. Its engine splits the paths into 256 blocks, each with its own
-random stream, so the result is identical on 1 core or 14. `just checks` confirms it against
-Black-76: 95% of options within 2 standard errors.
+`crates/carlo` is the Rust library. Its engine splits the paths into 256 blocks, each with its
+own random stream. That makes the answer identical whether the work runs on 1 core or 14.
+Against Black-76, 95% of the options land within 2 standard errors.
 
 ```bash
 just bench-py    # Python vs Rust → out/bench.md
@@ -56,10 +60,11 @@ just bench-rs    # Rust micro-benchmarks (criterion)
 |---|---:|---:|---:|---:|---:|
 | Time | 11.1 ms | 40.5 ms | 5.1 ms | 17.0 ms | 2.6 ms |
 
-**Lesson:** on one thread, Rust *loses* to NumPy. NumPy runs optimised C, and the Rust code uses
-ChaCha8, a cryptographic-quality random generator (5.9 ms per million numbers vs 1.2 ms for the
-simpler `SmallRng`). Rust wins with parallelism: 6–10× its own single-thread time on 14 cores and 4–6× faster than
-NumPy, depending on the run (parallel times ranged from 1.6 to 2.6 ms).
+**Lesson:** on one thread, Rust *loses* to NumPy. NumPy already runs optimised C, while the Rust
+version uses ChaCha8 so that each block can have an independent random stream. That generator
+is slower: 5.9 ms per million numbers, against 1.2 ms for `SmallRng`. Parallel Rust changes the
+picture: it is 6–10× faster than its own single-thread run and 4–6× faster than NumPy on this
+14-core machine.
 
 The generator is the whole single-thread gap: the same loop with `SmallRng` takes 8.1 ms against
 16.4 ms with ChaCha8 (`just bench-rs -- gbm_european`), so it beats NumPy's 10–11 ms. The library
@@ -77,10 +82,10 @@ the fast build, `RUSTFLAGS="-C target-cpu=native" just bench-rs` for the last co
 
 *Why doesn't one volatility fit every option?*
 
-Plot implied volatility against strike and it is not flat: the **volatility smile**. GBM can't
-produce it; **Heston**, where volatility itself moves randomly, can. `python/calibrate.py` fits
-Heston's five parameters to the market with QuantLib's fast formula, as desks do, and saves
-them to `data/heston.json` and the plot to `out/smile.png`.
+Plot implied volatility against strike and the line is not flat. That curve is the
+**volatility smile**. GBM cannot produce it; **Heston**, which lets volatility move as well as
+price, can. `python/calibrate.py` fits Heston's five parameters with QuantLib, writes them to
+`data/heston.json`, and saves the plot as `out/smile.png`.
 
 ```bash
 just calibrate
@@ -100,20 +105,22 @@ just checks
 Share of 15 calibrated options within 2 standard errors of QuantLib (expect ~95%). Time: one
 76-day call, 100k paths, parallel.
 
-**Lessons:** time steps that are too coarse bias the price, and a better scheme beats smaller
-steps. QE costs 1.8× more per step but is accurate with weekly steps, so it reaches the same
-accuracy as Euler about 28× faster. That only helps when the payoff allows coarse steps: a
-knock-out checked daily still needs daily steps. And Heston is a poor fit for BTC:
-without limits the fit drifts to absurd values, and even bounded, one parameter sits at its
-limit. Desks use richer models for this reason.
+**Lessons:** coarse time steps can bias the price, and a better scheme can matter more than
+simply adding steps. QE costs 1.8× more per step, but weekly QE reaches the same accuracy as
+fine-grained Euler about 28× faster. That shortcut only works when the product allows it: a
+knock-out monitored daily still needs daily steps.
+
+The calibration also shows the limit of this model. Without bounds, the parameters drift to
+implausible values; with bounds, one parameter still lands on its limit. Heston is useful here,
+but it does not fully describe the BTC volatility surface.
 
 ## 5. Products only simulation can price
 
 *What about options that depend on the whole path?*
 
 With the fitted Heston model, `crates/carlo/src/paths.rs` prices two **exotics**: a knock-out call
-(dies if BTC ever rises 30% above today) and an Asian call (pays on the average price). 76 days,
-forward 67,978 USD, strike 71,000, barrier 88,000:
+(it expires worthless if BTC reaches the barrier) and an Asian call (its payoff uses the average
+price). This example has 76 days left, a 67,978 USD forward, a 71,000 strike and an 88,000 barrier:
 
 ```bash
 just checks
@@ -130,7 +137,7 @@ knock-out.
 
 *How much could this book lose tomorrow, and can we compute it in under a second?*
 
-- **Greeks** (`greeks.rs`): move one input a little, reprice, take the difference.
+- **Greeks** (`greeks.rs`): move one input a little, reprice, and measure the difference.
 - **VaR** (`var.rs`, and `python/var_numpy.py` in NumPy): simulate 10,000 possible tomorrows,
   reprice a small book in each one, and read off the loss at the worst 1%. The knock-out has no
   formula, so every scenario runs its own simulation inside: 10,000 × 1,000 nested paths.
@@ -166,9 +173,10 @@ Python handles data and plots and Rust does the maths. Pricing all 322 options:
 
 *How fast can we reprice when the market moves?*
 
-`crates/carlo-live` subscribes to Deribit's live feed and reprices an option on every update, measuring
-the time from message to new price. On Linux, `--pin` ties it to one CPU core to reduce latency
-jitter; macOS does not allow this, so the program says so and continues.
+`crates/carlo-live` subscribes to Deribit's live feed and reprices an option on every update. It
+measures from the moment a message arrives to the moment the new price is ready. On Linux,
+`--pin` ties the work to one CPU core to reduce latency jitter. macOS treats this as a hint, so
+the program reports that and continues.
 
 ```bash
 just live --instrument BTC-29JAN27-72000-C --max-messages 50 --verbose
@@ -176,10 +184,10 @@ just live --instrument BTC-29JAN27-72000-C --max-messages 50 --verbose
 
 At 100,000 paths per repricing, the median latency was about 5 ms.
 
-## About the numbers
+## Reproducing these numbers
 
 **Machine:** Apple Silicon, 14 cores, macOS; Python 3.13, NumPy 2.5, Numba 0.68; Rust 1.97.
 Times are medians of several runs; yours will differ.
 
-**Library versions:** `rand` 0.10 moved `sample` to the `RngExt` trait, and PyO3 0.26+ renamed
-`allow_threads` to `detach`. Most examples online no longer compile as written.
+One practical version note: `rand` 0.10 moved `sample` to the `RngExt` trait, and PyO3 0.26+
+renamed `allow_threads` to `detach`. Older examples found online may need those changes.

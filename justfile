@@ -53,6 +53,10 @@ test: py-build
 doc:
     RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 
+# Regenerate the charts embedded in docs/reading-results.md (offline, fixed inputs)
+docs-assets:
+    uv run python python/docs_charts.py
+
 # Full gate: what CI would enforce
 ci: check test doc
 
