@@ -18,15 +18,9 @@ It does not place trades.
 
 The offline research path and the live feed both end at the same Rust pricing core:
 
-```mermaid
-flowchart LR
-    REST[Deribit REST] --> Files[Snapshot files]
-    Files --> Python[Python analysis and checks]
-    Python --> Bindings[carlo-py]
-    Bindings --> Core[carlo Rust core]
-    WS[Deribit WebSocket] --> Live[carlo-live]
-    Live --> Core
-```
+![The offline and live paths share the same Rust pricing core](docs/assets/repo-in-one-minute.svg)
+
+[Editable Excalidraw source](docs/assets/repo-in-one-minute.excalidraw)
 
 The `carlo` crate owns the pricing models and the shared Monte Carlo engine. Python fetches
 and explores the data, supplies NumPy and Numba versions to compare against, and calibrates
@@ -94,6 +88,8 @@ Run `just` to list every command.
 
 ## More
 
+- [Concepts in plain English](docs/concepts.md): Monte Carlo, volatility, Greeks and VaR
+  without assuming options knowledge.
 - [The journey](docs/journey.md): detailed results, benchmarks and lessons.
 - [Reading the results](docs/reading-results.md): what each number means and how it is used.
 - [Glossary](docs/glossary.md): options and Monte Carlo terms used in the project.

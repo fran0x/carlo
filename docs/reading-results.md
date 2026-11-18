@@ -2,7 +2,8 @@
 
 Think of this page as the legend for carlo's output. It explains what the files and numbers
 mean, which comparisons are useful, and where it is easy to draw the wrong conclusion. If a
-term is unfamiliar, the [glossary](glossary.md) has the short version.
+term is unfamiliar, start with [Concepts in plain English](concepts.md) or use the
+[glossary](glossary.md) for the short version.
 
 The numbers are model outputs from a dated market snapshot and a specific configuration.
 They are useful for validation, comparison and risk analysis; they are not executable quotes
@@ -77,7 +78,8 @@ formula.
 
 ![Standard error falls as the path count grows](assets/monte-carlo-convergence.svg)
 
-*A fixed GBM example. The straight reference line is the expected inverse-square-root rate.*
+*A fixed GBM example. Four times as many paths roughly halves the standard error.
+[Editable Excalidraw source](assets/monte-carlo-convergence.excalidraw).*
 
 ## What `just checks` is telling you
 
@@ -121,7 +123,8 @@ GBM volatility as a dotted reference.
 
 ![Synthetic observations, a Heston curve and flat GBM volatility](assets/synthetic-volatility-smile.svg)
 
-*This teaching chart is synthetic. It shows the shape without redistributing Deribit market data.*
+*This teaching chart is synthetic. It shows the shape without redistributing Deribit market data.
+[Editable Excalidraw source](assets/synthetic-volatility-smile.excalidraw).*
 
 `data/heston.json` contains:
 
@@ -179,7 +182,8 @@ positive numbers. If the Rust benchmark reports `VaR 16,138, ES 18,735` at 99% c
 ![Loss distribution with VaR and expected shortfall](assets/var-loss-distribution.svg)
 
 *This chart uses the NumPy baseline, which gives VaR 16,632 and expected shortfall 18,808
-from different random draws. Red marks the worst 1%.*
+from different random draws. Red marks the worst 1%.
+[Editable Excalidraw source](assets/var-loss-distribution.excalidraw).*
 
 A risk manager might use these measures to set limits, allocate capital or compare two books.
 They do not predict the worst possible loss. Carlo uses a built-in sample book and assumed
@@ -220,5 +224,8 @@ latency.
 6. Add spreads, fees, liquidity, funding, stress scenarios and model-risk reserves where relevant.
 7. Re-run across snapshots and configurations; one deterministic run is not evidence of stability.
 
-Regenerate all three charts with `just docs-assets`. They use fixed offline inputs and do not
-read downloaded market snapshots.
+The SVGs are exports of the editable Excalidraw files stored beside them. Regenerate every
+documentation visual with `just docs-assets`; this requires Node.js 22 or newer and an installed
+Chrome, Chromium, Edge or Firefox. `npx` downloads the pinned official Excalidraw CLI if it is not
+already cached. The visual sources use fixed offline values and do not contain downloaded market
+observations.

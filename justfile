@@ -53,9 +53,13 @@ test: py-build
 doc:
     RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 
-# Regenerate the charts embedded in docs/reading-results.md (offline, fixed inputs)
+# Render the editable Excalidraw documentation sources as SVG (Node 22+, installed browser)
 docs-assets:
-    uv run python python/docs_charts.py
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for source in docs/assets/*.excalidraw; do
+        npx --yes @excalidraw/cli@1.0.0 render "$source" --out "${source%.excalidraw}.svg"
+    done
 
 # Full gate: what CI would enforce
 ci: check test doc
