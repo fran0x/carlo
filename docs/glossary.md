@@ -13,7 +13,7 @@ memorise these; come back when a result uses a term you do not recognise.
 | **Volatility (σ)** | A measure of how widely returns move, quoted as an annual percentage. Higher volatility means a wider range of plausible prices. |
 | **Vol point** | One percentage point of volatility: 39% to 40% is one vol point. |
 | **Implied / realised volatility** | Implied volatility is the value that makes a pricing formula match today's option price. Realised volatility is measured from past market moves. |
-| **Volatility smile** | A plot showing that implied volatility changes with strike and expiry instead of staying flat. |
+| **Volatility smile / skew** | A plot showing that implied volatility changes with strike and expiry instead of staying flat. A smile bends at both ends; a skew mainly slopes in one direction. |
 | **GBM** | Geometric Brownian motion: a simple model where the price moves randomly and volatility stays constant. |
 | **Black-76** | The exact price of a European option under GBM, written in terms of the forward. Here it acts as the answer key for the simplest simulations. |
 | **Heston** | A model where both price and variance can move. Five parameters describe the starting variance, long-run level, mean reversion, vol of vol and correlation. Unlike GBM, it can produce a volatility smile. |

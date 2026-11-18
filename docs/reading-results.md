@@ -121,7 +121,10 @@ hedging and transaction costs, and how the market moves along the way.
 `out/smile.png` plots market implied volatility as points, the Heston fit as a line and a flat
 GBM volatility as a dotted reference.
 
-![Synthetic observations, a Heston curve and flat GBM volatility](assets/synthetic-volatility-smile.svg)
+The whole strike curve is often called a volatility smile. In this fixed example it slopes
+downward, so **skew** is the more precise description.
+
+![Synthetic observations, a Heston fit and flat GBM volatility](assets/synthetic-volatility-smile.svg)
 
 *This teaching chart is synthetic. It shows the shape without redistributing Deribit market data.
 [Editable Excalidraw source](assets/synthetic-volatility-smile.excalidraw).*

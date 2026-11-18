@@ -11,6 +11,12 @@ At its core, carlo asks four questions:
 3. How much could a group of positions lose over one day?
 4. Can the calculation run fast enough to be useful?
 
+Pricing and risk use the same simulated futures but summarize them differently:
+
+![Possible futures become either a model price or a loss distribution](assets/concepts-overview.svg)
+
+[Editable Excalidraw source](assets/concepts-overview.excalidraw)
+
 ## The basic objects
 
 An **option** is a contract linked to an asset such as Bitcoin.
@@ -53,8 +59,10 @@ volatility stays fixed.
 the Monte Carlo result is close to Black-76, the simulation is probably doing what it should.
 
 **Heston** is a richer model where volatility also changes. This lets it reproduce the broad
-shape seen in option markets, where one flat volatility does not fit every strike. More
-flexibility does not make Heston true; it remains a simplified description of the market.
+shape seen in option markets, where one flat volatility does not fit every strike. The fixed
+example in this repository slopes down as the strike rises; traders usually call that a
+**volatility skew**. More flexibility does not make Heston true; it remains a simplified
+description of the market.
 
 ## Calibration: fit the model to a snapshot
 
